@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-config
+  labels:
+    app: fluent-bit
+data:
+  fluent-bit.conf: |
+    [SERVICE]
+        Parsers_File ./parsers.conf
+
+    [INPUT]
+        Name tail
+        Path /app/logs/server.log
+        Parser generator
+
+    [FILTER]
+        Name    grep
+        Match   *
+        Exclude path ^/(health|metrics)$
+
+    [OUTPUT]
+        Name   stdout
+        Match  *
+
+    [OUTPUT]
+        Name   loki
+        Match  *
+        labels job=fluentbit, application=generator, level=$level
+        host logs-prod-us-central1.grafana.net
+        tls on
+        tls.verify  on
+        Port 443
+        http_user   ${LOKI_USER}
+        http_passwd ${LOKI_PASSWORD}
+
+  parsers.conf: |
+    [PARSER]
+        Name        generator
+        Format      json
+        Time_Key    time
+        Time_Format %Y-%m-%d %H:%M:%S.%L
+        Time_Keep   On

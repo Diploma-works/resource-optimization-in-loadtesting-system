@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main
+  labels:
+    app: main
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: main
+  template:
+    metadata:
+      labels:
+        app: main
+    spec:
+      containers:
+      - name: main
+        image: alexxxtrsv/main-service:v2.3
+        imagePullPolicy: "IfNotPresent"
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: log-storage
+          mountPath: /home/spring/logs
+        env:
+          - name: SPRING.CLOUD.CONSUL.HOST
+            value: "ledokol-config-consul-server"
+          - name: SPRING.CLOUD.CONSUL.DISCOVERY.HOSTNAME
+            value: main-service
+          - name: SPRING.DATA.MONGODB.HOST
+            value: 10.0.0.4
+          - name: SPRING.DATA.MONGODB.USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: db-user
+                key: username 
+          - name: SPRING.DATA.MONGODB.PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db-user
+                key: password
+          - name: spring.data.mongodb.authentication-database
+            value: ledokol
+          - name: logging.file.path
+            value: /home/spring/logs
+          - name: logging.file.name
+            value: /home/spring/logs/server.log
+          - name: server.port
+            value: "8080"
+      volumes:
+      - name: log-storage
+        emptyDir: {}

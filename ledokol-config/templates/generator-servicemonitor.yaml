@@ -1,0 +1,12 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: generator-monitor
+  labels:
+    app: generator
+spec:
+  selector:
+    matchLabels:
+      app: generator
+  endpoints:
+  - port: main

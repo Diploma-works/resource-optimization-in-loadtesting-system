@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: generator
+  labels:
+    app: generator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: generator
+  serviceName: generator
+  template:
+    metadata:
+      labels:
+        app: generator
+    spec:
+      containers:
+      - name: generator
+        image: alexxxtrsv/ledokol-generator:v3.1
+        imagePullPolicy: "IfNotPresent"
+        resources:
+          limits:
+            cpu: 150m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        ports:
+        - containerPort: 1455
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config.yaml
+          subPath: config.yaml
+        - name: shared-logs
+          mountPath: /app/logs
+        env:
+          - name: consul_server_address
+            value: "ledokol-config-consul-server:8500"
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: HOSTNAME
+            value: $(POD_NAME).generator
+      volumes:
+      - name: config-volume
+        configMap:
+          name: generator-config
+      - name: shared-logs
+        emptyDir: {}

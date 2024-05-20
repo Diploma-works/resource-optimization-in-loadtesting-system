@@ -1,0 +1,25 @@
+
+1. Создать сектер kubernetes с реквизитами базы данных:
+kubectl create secret generic db-user --from-literal=username=*** --from-literal=password=***
+
+2. Установить ледокол в кластер kubernetes c помощью helm:
+helm install ledokol-config .
+
+3. При внесении изменений в конфигурацию обновить командой: 
+helm upgrade ledokol-config .
+
+4. В main-deployment установить актуальные хост и логин пользователя БД:
+SPRING.DATA.MONGODB.HOST и SPRING.DATA.MONGODB.USERNAME
+
+5. Доступ к мониторингу:
+kubectl -n prometheus-monitoring port-forward service/kube-prometheus-stack-grafana 8001:80
+http://127.0.0.1:8001
+
+6. Доступ к дашборду:
+kauthproxy -n kubernetes-dashboard https://kubernetes-dashboard.svc
+
+7. Проброс портов для фронтенда:
+kubectl -n default port-forward service/frontend-service 8003:80
+
+8. Проброс портов для управляющего сервиса:
+kubectl -n default port-forward service/main-service 8004:8080

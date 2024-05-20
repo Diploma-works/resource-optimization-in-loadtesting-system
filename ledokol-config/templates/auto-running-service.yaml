@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+ name: auto-running-service
+ labels:
+   app: auto-runnung
+spec:
+  selector:
+    app: auto-runnung
+  ports:
+  - port: 8083
+    name: auto-runnung

@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-main-config
+  labels:
+    app: fluent-bit
+data:
+  fluent-bit.conf: |
+    [SERVICE]
+        Parsers_File ./parsers.conf
+
+    [INPUT]
+        Name tail
+        Path /app/logs/server.log
+        multiline.parser multiline_spring
+
+    [FILTER]
+        name             parser
+        match            *
+        key_name         log
+        parser           spring
+
+    [OUTPUT]
+        Name   stdout
+        Match  *
+
+    [OUTPUT]
+        Name   loki
+        Match  *
+        labels job=fluentbit, application=main-service, level=$level
+        host logs-prod-us-central1.grafana.net
+        tls on
+        tls.verify  on
+        Port 443
+        http_user   ${LOKI_USER}
+        http_passwd ${LOKI_PASSWORD}
+
+  parsers.conf: |
+    [PARSER]
+        Name        spring
+        Format      regex
+        Regex /^{"timestamp": "(?<timestamp>.*)", "level": "(?<level>.*)", "pid": "(?<pid>.*)", "thread": "(?<thread>.*)", "class": "(?<class>.*)", "message": "(?<message>.*)", "exception": "(?<exception>.*)"}/m
+
+    [MULTILINE_PARSER]
+        Name        multiline_spring
+        Type      regex
+        flush_timeout 1000
+        rule         "start_state"   "/^{(\"([a-z])+\": \"(.*)\",?)+/"   "cont"
+        rule         "cont"          "/^((\s+at.*)|(\"}.*)|(Caused by.*))/"                      "cont"

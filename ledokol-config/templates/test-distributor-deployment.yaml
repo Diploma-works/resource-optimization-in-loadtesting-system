@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-distributor
+  labels:
+    app: test-distributor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-distributor
+  template:
+    metadata:
+      labels:
+        app: test-distributor
+    spec:
+      containers:
+      - name: test-distributor
+        image: alexxxtrsv/test-distributor:v1.1
+        imagePullPolicy: "IfNotPresent"
+        ports:
+        - containerPort: 8087
+        volumeMounts:
+        - name: log-storage
+          mountPath: /home/spring/logs
+        env:
+          - name: SPRING.CLOUD.CONSUL.HOST
+            value: "ledokol-config-consul-server"
+          - name: SPRING.CLOUD.CONSUL.DISCOVERY.HOSTNAME
+            value: auto-runnung
+          - name: server.port
+            value: "8087"
+      volumes:
+      - name: log-storage
+        emptyDir: {}

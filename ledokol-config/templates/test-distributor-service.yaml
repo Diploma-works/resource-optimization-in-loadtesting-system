@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+ name: test-distributor-service
+ labels:
+   app: test-distributor
+spec:
+  selector:
+    app: test-distributor
+  ports:
+  - port: 8087
+    name: test-distributor

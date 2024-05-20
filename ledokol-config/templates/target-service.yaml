@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+ name: target-service
+ labels:
+   app: target-system
+spec:
+  selector:
+    app: target-system
+  ports:
+  - port: 8082
+    name: target-system
